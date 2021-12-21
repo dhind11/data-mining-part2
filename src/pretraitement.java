@@ -131,16 +131,24 @@ public class pretraitement {
         int support = 0;
         for(int i=0;i<dataset_disc.size();i++){
             String[] ligne=dataset_disc.get(i);
-            for(int j=0;j<(ligne.length)-1;j++){
-                for(int k=1;k<(ligne.length);k++) {
+            boolean found=false;
+            int j=0;
+            while(j<(ligne.length)-1){
+                int k=1;
+                while(k<(ligne.length)) {
                     if (!ligne[j].equals(ligne[k])) {
                         if (A[0].equals(ligne[j]) || A[1].equals(ligne[j])) {
                             if (A[0].equals(ligne[k]) || A[1].equals(ligne[k])) {
                                 support++;
+                                found=true;
                             }
                         }
                     }
+                    if(found){break;}
+                    else{k++;}
                 }
+                if(found){break;}
+                else{j++;}
             }
         }
         return support;
@@ -225,7 +233,7 @@ public class pretraitement {
         int support_min=(ds.Nb_Instances())*min_sup/100;
         ArrayList<String[]> L2=new ArrayList<>();
         for(int i=0;i<C2.size();i++){
-            if( Integer.valueOf(C2.get(i)[2])>=support_min ){
+            if(Integer.valueOf(C2.get(i)[2])>=support_min ){
                 L2.add(C2.get(i));
             }
         }
