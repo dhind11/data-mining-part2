@@ -55,7 +55,7 @@ public class Main {
         ArrayList<String[]> L2=new ArrayList<>();
         L2=pretraitement.Create_L2(ds,20,C2);
         pretraitement.printL2(L2);
-        System.out.print("\nmin-sup="+ds.Nb_Instances()*20/100);
+        System.out.println("\nmin-sup="+ds.Nb_Instances()*20/100);
         //************************************************ bayesian clasifier ********************************************
         Dataset train = new Dataset("dataset/seeds_dataset.txt");
         ds.ReadDataset("dataset/train.txt");
