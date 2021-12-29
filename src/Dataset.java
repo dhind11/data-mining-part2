@@ -5,10 +5,27 @@ import java.util.stream.Collectors;
 
 public class Dataset {
     ArrayList<ArrayList<Double>> data = new ArrayList();
+    ArrayList<double[]> train=new ArrayList<>();
+    ArrayList<double[]> test=new ArrayList<>();
+    ArrayList<Integer> train_indexes = new ArrayList<Integer>();
+    ArrayList<Integer> test_indexes = new ArrayList<Integer>();
 
     public Dataset(String path) {
         //path= to the dataset file (aka seed.txt)
         this.ReadDataset(path);
+    }
+
+    public Dataset(ArrayList<double[]> train) {
+        //path= to the dataset file (aka seed.txt)
+        for(int i=0;i<train.size();i++){
+            double[] line=new double[8];
+            ArrayList<Double> instance= new ArrayList<Double>();
+            line=train.get(i);
+            for (int j=0;j<7;j++) {
+                instance.add(line[j]);
+            }
+            this.data.add(instance);
+        }
     }
 
     public void ReadDataset(String path){
@@ -133,6 +150,38 @@ public class Dataset {
         System.out.println("\n");
     }
 
+    public void Train_Test(int train,int Q) {
+        int nb_train = 0;
+        int classe = 1;
+        int k = 0;
+
+        while (k < this.Nb_Instances()) {
+
+            while (nb_train < train && this.getClass(k) == classe) {
+                this.train.add(this.getInstance(k));
+                this.train_indexes.add(k);
+                nb_train++;
+                k++;
+            }
+            nb_train = 0;
+
+            while (k < this.Nb_Instances() && this.getClass(k) == classe) {
+                this.test.add(this.getInstance(k));
+                this.test_indexes.add(k);
+                k++;
+            }
+
+            if (classe < 4) {
+                classe++;
+            } else {
+                break;
+            }
+        }
+    }
+
+    public void Create_test(int test,int Q){
+
+    }
 
 
 /*

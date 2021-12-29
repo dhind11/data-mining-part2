@@ -56,13 +56,21 @@ public class Main {
         L2=pretraitement.Create_L2(ds,20,C2);
         pretraitement.printL2(L2);
         System.out.println("\nmin-sup="+ds.Nb_Instances()*20/100);
-        //************************************************ bayesian clasifier ********************************************
-        Dataset train = new Dataset("dataset/seeds_dataset.txt");
-        ds.ReadDataset("dataset/train.txt");
-        Dataset test = new Dataset("dataset/seeds_dataset.txt");
-        ds.ReadDataset("dataset/test.txt");
-        //pretraitement.proba_bayes(train,test);
-        System.out.print(train.Nb_Instances());
+        //************************************************ Train Test Splitting ********************************************
+        //train parameter here is an int that gives you the number of lines per class, if train=20, u take 20 each class
+        Train_Test train_test= new Train_Test(ds,50,4);
+        /*for (String[] instance:train_test.train_disc) {
+            System.out.print("**\t");
+            for (String val:instance) {
+                System.out.print(val+"/");
+            }
+            System.out.println("\n");
+        }*/
+
+        //************************************************ Naive Bayesian Classifier********************************************
+        double[] naive_bayesian=pretraitement.Naive_Bayesian(train_test.train_disc,4,train_test.test_disc.get(0));
+        //String mot="I21";
+        //System.out.println(Character.getNumericValue(mot.charAt(2))+1);
     }
 
-}
+}}

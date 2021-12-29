@@ -233,8 +233,11 @@ public class pretraitement {
         int support_min=(ds.Nb_Instances())*min_sup/100;
         ArrayList<String[]> L2=new ArrayList<>();
         for(int i=0;i<C2.size();i++){
+
             if(Integer.valueOf(C2.get(i)[2])>=support_min ){
                 L2.add(C2.get(i));
+                //System.out.println("items:"+C2.get(i)[0]+C2.get(i)[1]+" Support="+Integer.valueOf(C2.get(i)[2]));
+
             }
         }
         L2=sort_L2(L2);
@@ -247,9 +250,7 @@ public class pretraitement {
             System.out.print("{"+L2.get(i)[0]+","+L2.get(i)[1]+"}"+"\t");
         }
     }
-    /*public static int nb_instance_class(int nb_classe,Dataset ds){
 
-    }*/
     public static void proba_bayes(Dataset train,Dataset test){
         ArrayList<String[]> train_disc=new ArrayList<>();
         ArrayList<String[]> test_disc=new ArrayList<>();
@@ -271,5 +272,92 @@ public class pretraitement {
         for(int i=1;i<4;i++){
             System.out.println("P(C"+i+")= "+train_proba);
         }
+    }
+
+    public static int Nb_instance_per_classe(ArrayList<String[]> dataset_disc,int classe){
+        int cpt=0;
+        for(int i=0;i<dataset_disc.size();i++){
+            int val;
+            val=Integer.valueOf(dataset_disc.get(i)[7]);
+            if(val==classe){cpt++;}
+        }
+        return cpt;
+    }
+
+    //proba P=|C(i,d)|/|D|   (d=D)
+    public static double[] proba_per_classes(ArrayList<String[]> dataset_disc){
+        //|Ci,d|
+        double[] nb_instance_class = new double[3];
+        for(int i=0;i<3;i++){
+            nb_instance_class[i]=Nb_instance_per_classe(dataset_disc,i+1);
+        }
+        //|D|
+        double D=dataset_disc.size();
+        //|(Ci,d)|/|D|
+        double[] classes_probas=new double[3];
+        for(int i=0;i<3;i++){
+            classes_probas[i]=(nb_instance_class[i]/D);
+        }
+        return(classes_probas);
+
+    }
+
+    //calcul probas per attribute
+    public static ArrayList<double[]> probas_per_attribute(ArrayList<String[]> dataset_disc,int Q,int attribute_index){
+        ArrayList<double[]> probas=new ArrayList<>();//Q=4, probas de [(C1,C1,C1,C1),(C2,C2,C2,C2),(C3,C3,C3,C3)]
+
+        for (int i = 0; i < 3; i++) {
+            double[] proba_class=new double[Q];//(C1,C1,C1,C1)
+            for (int j = 0; j < Q; j++) {
+                proba_class[j]=0;
+            }
+            probas.add(proba_class);
+        }
+
+        for(int i=0;i<dataset_disc.size();i++){
+            System.out.println(i);
+            String value=dataset_disc.get(i)[attribute_index];
+            int classe=Integer.valueOf(dataset_disc.get(i)[7]);
+            char ch=value.charAt(2);
+            int intervalle=Integer.parseInt(String.valueOf(ch));
+            System.out.print(value+":"+intervalle+",line:"+(int)(i+1)+"\t");
+            double[] proba_class2=new double[Q];
+            proba_class2=probas.get(classe);
+            proba_class2[intervalle-1]++;
+            probas.set(classe,proba_class2);
+        }
+
+        for (int i = 0; i < probas.size(); i++) {
+            for (int j = 0; j < probas.get(i).length; j++) {
+                probas.get(i)[j]=probas.get(i)[j]/(double)dataset_disc.size();
+            }
+        }
+        return probas;
+    }
+
+    //conditional probas
+    public static ArrayList<ArrayList<double[]>> Cond_probas(ArrayList<String[]> dataset_disc, int Q){
+        ArrayList<ArrayList<double[]>> cond_probas=new ArrayList();
+
+        for(int i=0;i<dataset_disc.get(0).length-1;i++){
+            cond_probas.add(probas_per_attribute(dataset_disc,Q,i));
+        }
+        return cond_probas;
+    }
+
+    //Naive bayesian
+    public static double[] Naive_Bayesian(ArrayList<String[]> dataset_disc,int Q,String[] instance){
+        double[] naive_bayesian=new double[3];
+        double[] probas_classes=proba_per_classes(dataset_disc);
+        ArrayList<ArrayList<double[]>> cond_probas=Cond_probas(dataset_disc,Q);
+
+        for (int i = 0; i < 3; i++) {
+            naive_bayesian[i]=probas_classes[i];
+            for (int j = 0; j < instance.length; j++) {
+                int intervalle=(int)(instance[j].charAt(2));
+                naive_bayesian[i]=naive_bayesian[i]*(cond_probas.get(j).get(i)[intervalle]);
+            }
+        }
+        return naive_bayesian;
     }
 }
