@@ -35,7 +35,7 @@ public class Dataset {
         //return this.data;
     }
 
-    public int nbInstances() { return data.size(); }
+    public int nb_Instances() { return data.size(); }
 
     public int nbAttributes() { return data.get(0).size(); }
 
@@ -55,9 +55,9 @@ public class Dataset {
     }
 
     public double[] getColumn (int attribute_index){
-        double[] column = new double[this.nbInstances()];
+        double[] column = new double[this.nb_Instances()];
 
-        for (int i = 0; i < this.nbInstances(); i++) {
+        for (int i = 0; i < this.nb_Instances(); i++) {
             column[i] = data.get(i).get(attribute_index);
         }
 
@@ -96,7 +96,7 @@ public class Dataset {
 
     public int nbInstancePerClass (int classe){       //Nombre d'instances de cette classe
         int nb_inst = 0;
-        for (int i = 0; i < nbInstances(); i++) {
+        for (int i = 0; i < nb_Instances(); i++) {
             if (this.getClass(i) == classe)  nb_inst++;
         }
         return nb_inst;
@@ -104,7 +104,7 @@ public class Dataset {
 
     public void saveDataset() throws FileNotFoundException{
         PrintWriter PW = new PrintWriter(new FileOutputStream("dataset\\new_dataset.txt"));
-        for (int i = 0; i < this.nbInstances(); i++) {
+        for (int i = 0; i < this.nb_Instances(); i++) {
             double[] instance = this.getInstance(i);
             String inst = "";
             for (double value : instance) {
@@ -116,7 +116,7 @@ public class Dataset {
     }
 
     public void printDataset () {
-        for (int i = 0; i < this.nbInstances(); i++) {
+        for (int i = 0; i < this.nb_Instances(); i++) {
             double[] instance = this.getInstance(i);
             System.out.print("\n");
             for (int j = 0; j < this.nbAttributes(); j++) {

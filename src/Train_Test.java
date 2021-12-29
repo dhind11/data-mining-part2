@@ -17,7 +17,7 @@ public class Train_Test {
         int classe=1;
         int k=0;
 
-        while(k<ds.nbInstances()){
+        while(k<ds.nb_Instances()){
 
             while(nb_train<train && ds.getClass(k)==classe){
                     train_indexes.add(k);
@@ -26,7 +26,7 @@ public class Train_Test {
                 }
             nb_train=0;
 
-            while(k<ds.nbInstances() && ds.getClass(k)==classe){
+            while(k<ds.nb_Instances() && ds.getClass(k)==classe){
                 test_indexes.add(k);
                 k++;
             }
@@ -68,7 +68,7 @@ public class Train_Test {
         int classe = 1;
         int k = 0;
 
-        while (k < ds.nbInstances()) {
+        while (k < ds.nb_Instances()) {
 
             while (nb_train < train && ds.getClass(k) == classe) {
                 this.train.add(ds.getInstance(k));
@@ -78,7 +78,7 @@ public class Train_Test {
             }
             nb_train = 0;
 
-            while (k < ds.nbInstances() && ds.getClass(k) == classe) {
+            while (k < ds.nb_Instances() && ds.getClass(k) == classe) {
                 this.test.add(ds.getInstance(k));
                 this.test_indexes.add(k);
                 k++;

@@ -29,7 +29,7 @@ public class Main {
 
         //************************************************ create dataset_disc ********************************************
         ArrayList<String[]> dataset_disc = new ArrayList<>(); // dataset discretisée
-        for(int i = 0; i<ds.Nb_Instances(); i++){
+        for(int i = 0; i<ds.nb_Instances(); i++){
             dataset_disc.add(pretraitement.Discretisation(ds,i,4));
         }
 
@@ -56,7 +56,7 @@ public class Main {
         ArrayList<String[]> L2=new ArrayList<>();
         L2=pretraitement.Create_L2(ds,20,C2);
         pretraitement.printL2(L2);
-        System.out.println("\nmin-sup="+ds.Nb_Instances()*20/100);
+        System.out.println("\nmin-sup="+ds.nb_Instances()*20/100);
         //************************************************ Train Test Splitting ********************************************
         //train parameter here is an int that gives you the number of lines per class, if train=20, u take 20 each class
         Train_Test train_test= new Train_Test(ds,50,4);
@@ -74,4 +74,4 @@ public class Main {
         //System.out.println(Character.getNumericValue(mot.charAt(2))+1);
     }
 
-}}
+}

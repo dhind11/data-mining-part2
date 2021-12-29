@@ -224,8 +224,8 @@ public class Calcul {
         for (int i = 0; i < column1.length; i++) {
             sum += column1[i]*column2[i] ;
         }
-        coef = sum - ds.nbInstances()*(moy(ds, X_index))*moy(ds, Y_index) ;
-        coef = coef/((ds.nbInstances() - 1)* ecart_type(ds, X_index) * ecart_type(ds, Y_index));
+        coef = sum - ds.nb_Instances()*(moy(ds, X_index))*moy(ds, Y_index) ;
+        coef = coef/((ds.nb_Instances() - 1)* ecart_type(ds, X_index) * ecart_type(ds, Y_index));
         return coef;
     }
 

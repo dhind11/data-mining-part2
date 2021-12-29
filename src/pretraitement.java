@@ -28,7 +28,7 @@ public class pretraitement {
         for (int i = 0; i < column.length; i++) {
             S = S + Math.abs( column[i] -  moyenne);
         }
-        S = S /  ds.nbInstances(); // 1/N
+        S = S /  ds.nb_Instances(); // 1/N
         return S;
     }
 
@@ -63,7 +63,7 @@ public class pretraitement {
 
     public static double[] bornes(Dataset ds, double[] attribut_col , int Q){
         //fonction qui permet de calculer les bornes des intervalles pour la discretisation en classes d'effectifs egaux
-        int nb_inst = (int) Math.ceil(ds.nbInstances() / Q); //Nombre d'instances par intervalle.
+        int nb_inst = (int) Math.ceil(ds.nb_Instances() / Q); //Nombre d'instances par intervalle.
 
         //double[] attribut_col = ds.getColumn(att_index);
         Arrays.sort(attribut_col);
@@ -162,7 +162,7 @@ public class pretraitement {
     public static ArrayList<ElementC1> Create_itemset1 (Dataset ds, int min_sup, int Q){
 
         ArrayList<String[]> dataset_disc = new ArrayList<>(); // dataset discretisée
-        for(int i = 0; i<ds.nbInstances(); i++){
+        for(int i = 0; i<ds.nb_Instances(); i++){
             dataset_disc.add(Discretisation(ds,i,Q));
         }
 
@@ -199,7 +199,7 @@ public class pretraitement {
     }
 
     public static ArrayList<String> Create_L1(Dataset ds, int min_sup,ArrayList<ElementC1> C1){
-        int support_min=(ds.nbInstances())*min_sup/100;
+        int support_min=(ds.nb_Instances())*min_sup/100;
         ArrayList<String> L1=new ArrayList<>();
         for(int i=0;i<C1.size();i++){
             if(C1.get(i).freq>=support_min){
@@ -246,7 +246,7 @@ public class pretraitement {
     public static ArrayList<String[]> Create_itemset2(Dataset ds,ArrayList<String> L1,int Q){
 
         ArrayList<String[]> dataset_disc = new ArrayList<>(); // dataset discretisée
-        for(int i = 0; i<ds.nbInstances(); i++){
+        for(int i = 0; i<ds.nb_Instances(); i++){
             dataset_disc.add(Discretisation(ds,i,Q));
         }
 
@@ -319,7 +319,7 @@ public class pretraitement {
     }
 
     public static ArrayList<String[]> Create_L2(Dataset ds, int min_sup,ArrayList<String[]> C2){
-        int support_min=(ds.nbInstances())*min_sup/100;
+        int support_min=(ds.nb_Instances())*min_sup/100;
         ArrayList<String[]> L2=new ArrayList<>();
         for(int i=0;i<C2.size();i++){
 
@@ -344,11 +344,11 @@ public class pretraitement {
         ArrayList<String[]> train_disc=new ArrayList<>();
         ArrayList<String[]> test_disc=new ArrayList<>();
         //DISCRETIZATON
-        for(int i=0;i<train.nbInstances()-10;i++){
+        for(int i=0;i<train.nb_Instances()-10;i++){
             String[] instance = pretraitement.Discretisation(train, i,4);
             train_disc.add(instance);
         }
-        for(int i=0;i<test.nbInstances()-10;i++){
+        for(int i=0;i<test.nb_Instances()-10;i++){
             String[] instance = pretraitement.Discretisation(test, i,4);
             test_disc.add(instance);
         }
