@@ -21,7 +21,7 @@ public class Main {
         }
 
         //************************************************Discretization********************************************
-        String [] inst_disc = pretraitement.Discretisation(ds, 0,4);
+        String [] inst_disc = pretraitement.Discretisation2(ds, 0,4);
         System.out.print("\nDiscretisation (methode2) : \t");
         for (int i = 0; i < inst_disc.length ; i++) {
             System.out.print("\t" + inst_disc[i]);
@@ -30,8 +30,15 @@ public class Main {
         //************************************************ create dataset_disc ********************************************
         ArrayList<String[]> dataset_disc = new ArrayList<>(); // dataset discretisée
         for(int i = 0; i<ds.nb_Instances(); i++){
-            dataset_disc.add(pretraitement.Discretisation(ds,i,4));
+            dataset_disc.add(pretraitement.Discretisation2(ds,i,4));
         }
+        /*for (String[] instance:dataset_disc) {
+            System.out.print("**\t");
+            for (String val:instance) {
+                System.out.print(val+"/");
+            }
+            System.out.println("\n");
+        }*/
 
         //************************************************ calculate a support ********************************************
         String A="I21";
@@ -70,6 +77,13 @@ public class Main {
 
         //************************************************ Naive Bayesian Classifier********************************************
         double[] naive_bayesian=pretraitement.Naive_Bayesian(train_test.train_disc,4,train_test.test_disc.get(0));
+        /*for (String[] instance:train_test.train_disc) {
+            System.out.print("**\t");
+            for (String val:instance) {
+                System.out.print(val+"/");
+            }
+            System.out.println("\n");
+        }*/
         //String mot="I21";
         //System.out.println(Character.getNumericValue(mot.charAt(2))+1);
     }

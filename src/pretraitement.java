@@ -5,7 +5,7 @@ import java.util.SortedSet;
 import java.util.*;
 
 public class pretraitement {
-
+    /*************************************** Normalization ***********************************************************/
     private static double MinMaxNorm (double val, double min, double max){
         return (val - min)/(max-min) ;
     }
@@ -78,8 +78,7 @@ public class pretraitement {
 
         return bornes_sup;
     }
-
-
+    /*************************************** Discretisation ***********************************************************/
     public static String[] Discretisation (Dataset ds, int instance_index,  int Q){
         //Discretisation en classes d'effectifs egaux (Equal-frequency)
 
@@ -98,7 +97,7 @@ public class pretraitement {
                     break;
                 }
                 else if(instance[i] >= borne_sup) {
-                    System.out.print("I'm here");
+                    //System.out.print("I'm here");
                     borne_sup = bornes_sup[num_intervalle];
                     num_intervalle = num_intervalle + 1;
                 }
@@ -124,7 +123,7 @@ public class pretraitement {
             double borne_sup = min + width;
             int num_intervalle = 1;
             while (borne_sup <= max) {
-                if (instance[i] < borne_sup) {
+                if (instance[i] < borne_sup || instance[i]==max) {
                     break;
                 }
                 else if(instance[i] >= borne_sup) {
@@ -137,7 +136,7 @@ public class pretraitement {
         }
         return new_instance;
     }
-
+    /*************************************** Itemsets ***********************************************************/
     public static int calcul_support (String A,ArrayList<String[]> dataset_disc){
         int support = 0;
         for(int i=0;i<dataset_disc.size();i++){
@@ -163,7 +162,7 @@ public class pretraitement {
 
         ArrayList<String[]> dataset_disc = new ArrayList<>(); // dataset discretisée
         for(int i = 0; i<ds.nb_Instances(); i++){
-            dataset_disc.add(Discretisation(ds,i,Q));
+            dataset_disc.add(Discretisation2(ds,i,Q));
         }
 
         ArrayList<ElementC1> C1 = new ArrayList<>();
@@ -247,7 +246,7 @@ public class pretraitement {
 
         ArrayList<String[]> dataset_disc = new ArrayList<>(); // dataset discretisée
         for(int i = 0; i<ds.nb_Instances(); i++){
-            dataset_disc.add(Discretisation(ds,i,Q));
+            dataset_disc.add(Discretisation2(ds,i,Q));
         }
 
         String I1,I2;
@@ -339,7 +338,7 @@ public class pretraitement {
             System.out.print("{"+L2.get(i)[0]+","+L2.get(i)[1]+"}"+"\t");
         }
     }
-
+    /*************************************** Naive Bayesian ***********************************************************/
     public static void proba_bayes(Dataset train,Dataset test){
         ArrayList<String[]> train_disc=new ArrayList<>();
         ArrayList<String[]> test_disc=new ArrayList<>();
@@ -404,16 +403,17 @@ public class pretraitement {
         }
 
         for(int i=0;i<dataset_disc.size();i++){
-            System.out.println(i);
+            //System.out.println(i);
             String value=dataset_disc.get(i)[attribute_index];
             int classe=Integer.valueOf(dataset_disc.get(i)[7]);
+            //System.out.println("classe="+classe);
             char ch=value.charAt(2);
             int intervalle=Integer.parseInt(String.valueOf(ch));
-            System.out.print(value+":"+intervalle+",line:"+(int)(i+1)+"\t");
+            //System.out.print(value+":"+intervalle+",line:"+(int)(i+1)+"\t");
             double[] proba_class2=new double[Q];
-            proba_class2=probas.get(classe);
+            proba_class2=probas.get(classe-1);
             proba_class2[intervalle-1]++;
-            probas.set(classe,proba_class2);
+            probas.set(classe-1,proba_class2);
         }
 
         for (int i = 0; i < probas.size(); i++) {
