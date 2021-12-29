@@ -5,27 +5,9 @@ import java.util.stream.Collectors;
 
 public class Dataset {
     ArrayList<ArrayList<Double>> data = new ArrayList();
-    ArrayList<double[]> train=new ArrayList<>();
-    ArrayList<double[]> test=new ArrayList<>();
-    ArrayList<Integer> train_indexes = new ArrayList<Integer>();
-    ArrayList<Integer> test_indexes = new ArrayList<Integer>();
 
     public Dataset(String path) {
-        //path= to the dataset file (aka seed.txt)
         this.ReadDataset(path);
-    }
-
-    public Dataset(ArrayList<double[]> train) {
-        //path= to the dataset file (aka seed.txt)
-        for(int i=0;i<train.size();i++){
-            double[] line=new double[8];
-            ArrayList<Double> instance= new ArrayList<Double>();
-            line=train.get(i);
-            for (int j=0;j<7;j++) {
-                instance.add(line[j]);
-            }
-            this.data.add(instance);
-        }
     }
 
     public void ReadDataset(String path){
@@ -53,7 +35,7 @@ public class Dataset {
         //return this.data;
     }
 
-    public int Nb_Instances() { return data.size(); }
+    public int nbInstances() { return data.size(); }
 
     public int nbAttributes() { return data.get(0).size(); }
 
@@ -73,9 +55,9 @@ public class Dataset {
     }
 
     public double[] getColumn (int attribute_index){
-        double[] column = new double[this.Nb_Instances()];
+        double[] column = new double[this.nbInstances()];
 
-        for (int i = 0; i < this.Nb_Instances(); i++) {
+        for (int i = 0; i < this.nbInstances(); i++) {
             column[i] = data.get(i).get(attribute_index);
         }
 
@@ -114,7 +96,7 @@ public class Dataset {
 
     public int nbInstancePerClass (int classe){       //Nombre d'instances de cette classe
         int nb_inst = 0;
-        for (int i = 0; i < Nb_Instances(); i++) {
+        for (int i = 0; i < nbInstances(); i++) {
             if (this.getClass(i) == classe)  nb_inst++;
         }
         return nb_inst;
@@ -122,7 +104,7 @@ public class Dataset {
 
     public void saveDataset() throws FileNotFoundException{
         PrintWriter PW = new PrintWriter(new FileOutputStream("dataset\\new_dataset.txt"));
-        for (int i = 0; i < this.Nb_Instances(); i++) {
+        for (int i = 0; i < this.nbInstances(); i++) {
             double[] instance = this.getInstance(i);
             String inst = "";
             for (double value : instance) {
@@ -134,7 +116,7 @@ public class Dataset {
     }
 
     public void printDataset () {
-        for (int i = 0; i < this.Nb_Instances(); i++) {
+        for (int i = 0; i < this.nbInstances(); i++) {
             double[] instance = this.getInstance(i);
             System.out.print("\n");
             for (int j = 0; j < this.nbAttributes(); j++) {
@@ -150,38 +132,6 @@ public class Dataset {
         System.out.println("\n");
     }
 
-    public void Train_Test(int train,int Q) {
-        int nb_train = 0;
-        int classe = 1;
-        int k = 0;
-
-        while (k < this.Nb_Instances()) {
-
-            while (nb_train < train && this.getClass(k) == classe) {
-                this.train.add(this.getInstance(k));
-                this.train_indexes.add(k);
-                nb_train++;
-                k++;
-            }
-            nb_train = 0;
-
-            while (k < this.Nb_Instances() && this.getClass(k) == classe) {
-                this.test.add(this.getInstance(k));
-                this.test_indexes.add(k);
-                k++;
-            }
-
-            if (classe < 4) {
-                classe++;
-            } else {
-                break;
-            }
-        }
-    }
-
-    public void Create_test(int test,int Q){
-
-    }
 
 
 /*

@@ -11,6 +11,7 @@ public class Main {
         Dataset ds = new Dataset("dataset/seeds_dataset.txt");
         //ds.ReadDataset("dataset/seeds_dataset.txt");
 
+
         int num_instance = 0;
 
         double [] inst_norm = pretraitement.MinMaxNormalization(ds, num_instance);

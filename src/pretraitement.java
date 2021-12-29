@@ -6,7 +6,7 @@ import java.util.*;
 
 public class pretraitement {
 
-    public static double MinMaxNorm (double val, double min, double max){
+    private static double MinMaxNorm (double val, double min, double max){
         return (val - min)/(max-min) ;
     }
 
@@ -20,7 +20,96 @@ public class pretraitement {
         return new_instance;
     }
 
+    private static double calcul_S (Dataset ds, int index_att, double moyenne){
+        double S = 0;
+        double[] column = ds.getColumn(index_att);
+        //double moyenne = Calcul.moy(ds, index_att);
+
+        for (int i = 0; i < column.length; i++) {
+            S = S + Math.abs( column[i] -  moyenne);
+        }
+        S = S /  ds.nbInstances(); // 1/N
+        return S;
+    }
+
+    public static double[] ZscoreNormalization (Dataset ds, int instance_index){
+        double[] instance = ds.getInstance(instance_index);
+        double[] new_instance = new double[instance.length];
+
+        for (int i = 0; i < new_instance.length; i++) {
+            double moyenne = Calcul.moy(ds, i);
+            new_instance[i] = (instance[i] - moyenne) / (calcul_S(ds, i, moyenne)) ;
+        }
+        return new_instance;
+    }
+
+    private static double[] normal_col(Dataset ds, int index_att, int norm){
+        //Cette fonction retourne une colonne normalisée
+        // norm = 0 -> MinMax normalization  ;  norm = 1 -> Z-Score normalization
+        double [] column = ds.getColumn(index_att);
+        double [] new_column = new double[column.length];
+        if (norm == 0) { // MinMax normalization
+            for (int i = 0; i < column.length; i++) {
+                new_column[i] = MinMaxNormalization (ds, i)[index_att];
+            }
+        }
+        else{ // Z-Score normalization
+            for (int i = 0; i < column.length; i++) {
+                new_column[i] = ZscoreNormalization (ds, i)[index_att];
+            }
+        }
+        return  new_column;
+    }
+
+    public static double[] bornes(Dataset ds, double[] attribut_col , int Q){
+        //fonction qui permet de calculer les bornes des intervalles pour la discretisation en classes d'effectifs egaux
+        int nb_inst = (int) Math.ceil(ds.nbInstances() / Q); //Nombre d'instances par intervalle.
+
+        //double[] attribut_col = ds.getColumn(att_index);
+        Arrays.sort(attribut_col);
+
+        double[] bornes_sup = new double[Q]; //Tableau qui va contenir les bornes supérieurs des 'Q' intervalles
+
+        for (int i = 1; i < Q; i++) {
+            int indice_quantile = nb_inst * i - 1;
+            bornes_sup[i-1] = attribut_col[indice_quantile];
+        }
+        bornes_sup[Q-1] = attribut_col[attribut_col.length-1]; //la borne sup du dernier intervalle
+
+        return bornes_sup;
+    }
+
+
     public static String[] Discretisation (Dataset ds, int instance_index,  int Q){
+        //Discretisation en classes d'effectifs egaux (Equal-frequency)
+
+        //double [] instance = ds.getInstance(instance_index);
+        double [] instance = pretraitement.MinMaxNormalization(ds, instance_index);
+        String[] new_instance = new String[instance.length-1];
+
+        for (int i = 0; i < instance.length - 1 ; i++) {
+            double[] attribut_col = normal_col(ds, i, 0);
+            double[] bornes_sup = bornes(ds, attribut_col, Q); //Recuperer les bornes superieur des intervalles de cette attributs
+            double borne_sup = bornes_sup[0];
+            int num_intervalle = 1;
+            //Pour la valeur : trouver le num de l'intervalle (en comparant la valeur avec la borne sup des intervalles)
+            while (borne_sup <= bornes_sup[Q-1]){   // bornes_sup[Q-1] : borne max
+                if (instance[i] < borne_sup) {
+                    break;
+                }
+                else if(instance[i] >= borne_sup) {
+                    System.out.print("I'm here");
+                    borne_sup = bornes_sup[num_intervalle];
+                    num_intervalle = num_intervalle + 1;
+                }
+            }
+            new_instance[i] = "I" + (i+1) + num_intervalle;
+        }
+        return new_instance;
+    }
+
+    public static String[] Discretisation2 (Dataset ds, int instance_index,  int Q){
+        //Discretisation en classes d'amplitudes égales
         double min = 0;
         double max = 1;
         double width = 1 / (double)Q;  // On considere l'intervalle [0,1]
@@ -73,7 +162,7 @@ public class pretraitement {
     public static ArrayList<ElementC1> Create_itemset1 (Dataset ds, int min_sup, int Q){
 
         ArrayList<String[]> dataset_disc = new ArrayList<>(); // dataset discretisée
-        for(int i = 0; i<ds.Nb_Instances(); i++){
+        for(int i = 0; i<ds.nbInstances(); i++){
             dataset_disc.add(Discretisation(ds,i,Q));
         }
 
@@ -110,7 +199,7 @@ public class pretraitement {
     }
 
     public static ArrayList<String> Create_L1(Dataset ds, int min_sup,ArrayList<ElementC1> C1){
-        int support_min=(ds.Nb_Instances())*min_sup/100;
+        int support_min=(ds.nbInstances())*min_sup/100;
         ArrayList<String> L1=new ArrayList<>();
         for(int i=0;i<C1.size();i++){
             if(C1.get(i).freq>=support_min){
@@ -157,7 +246,7 @@ public class pretraitement {
     public static ArrayList<String[]> Create_itemset2(Dataset ds,ArrayList<String> L1,int Q){
 
         ArrayList<String[]> dataset_disc = new ArrayList<>(); // dataset discretisée
-        for(int i = 0; i<ds.Nb_Instances(); i++){
+        for(int i = 0; i<ds.nbInstances(); i++){
             dataset_disc.add(Discretisation(ds,i,Q));
         }
 
@@ -230,7 +319,7 @@ public class pretraitement {
     }
 
     public static ArrayList<String[]> Create_L2(Dataset ds, int min_sup,ArrayList<String[]> C2){
-        int support_min=(ds.Nb_Instances())*min_sup/100;
+        int support_min=(ds.nbInstances())*min_sup/100;
         ArrayList<String[]> L2=new ArrayList<>();
         for(int i=0;i<C2.size();i++){
 
@@ -255,11 +344,11 @@ public class pretraitement {
         ArrayList<String[]> train_disc=new ArrayList<>();
         ArrayList<String[]> test_disc=new ArrayList<>();
         //DISCRETIZATON
-        for(int i=0;i<train.Nb_Instances()-10;i++){
+        for(int i=0;i<train.nbInstances()-10;i++){
             String[] instance = pretraitement.Discretisation(train, i,4);
             train_disc.add(instance);
         }
-        for(int i=0;i<test.Nb_Instances()-10;i++){
+        for(int i=0;i<test.nbInstances()-10;i++){
             String[] instance = pretraitement.Discretisation(test, i,4);
             test_disc.add(instance);
         }
