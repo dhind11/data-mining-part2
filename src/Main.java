@@ -19,7 +19,6 @@ public class Main {
         for (int i = 0; i < inst_norm.length-1 ; i++) {
             //System.out.print("\t" + inst_norm[i]);
         }
-
         //************************************************Discretization********************************************
         String [] inst_disc = pretraitement.Discretisation2(ds, 0,4);
         System.out.print("\nDiscretisation (methode2) : \t");
@@ -32,6 +31,7 @@ public class Main {
         for(int i = 0; i<ds.nb_Instances(); i++){
             dataset_disc.add(pretraitement.Discretisation2(ds,i,4));
         }
+
         /*for (String[] instance:dataset_disc) {
             System.out.print("**\t");
             for (String val:instance) {
@@ -76,10 +76,16 @@ public class Main {
         }*/
 
         //************************************************ Naive Bayesian Classifier********************************************
-        double[] naive_bayesian=pretraitement.Naive_Bayesian(train_test.train_disc,4,train_test.test_disc.get(0));
-        for(double element:naive_bayesian){
+        int naive_bayesian=pretraitement.Naive_Bayesian(train_test.train_disc,4,train_test.test_disc.get(0));
+        /*for(double element:naive_bayesian){
             System.out.println(element);
+        }*/
+
+        for (String element:train_test.test_disc.get(0)) {
+            System.out.print(element+"\t");
         }
+        System.out.print("\n");
+        System.out.println("Prediction="+naive_bayesian);
         //System.out.println(train_test.test_disc.get(0)[7]);
         /*for (String[] instance:train_test.train_disc) {
             System.out.print("**\t");
