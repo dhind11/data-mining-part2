@@ -442,10 +442,12 @@ public class pretraitement {
 
         for (int i = 0; i < 3; i++) {
             naive_bayesian[i]=probas_classes[i];
-            for (int j = 0; j < instance.length; j++) {
-                int intervalle=(int)(instance[j].charAt(2));
+            for (int j = 0; j < instance.length-1; j++) {
+                int intervalle=Integer.parseInt(String.valueOf(instance[j].charAt(2)));
+                System.out.println("i="+i+"/j="+j+"/intervalle="+intervalle);
                 naive_bayesian[i]=naive_bayesian[i]*(cond_probas.get(j).get(i)[intervalle]);
             }
+
         }
         return naive_bayesian;
     }

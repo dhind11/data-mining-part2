@@ -77,6 +77,10 @@ public class Main {
 
         //************************************************ Naive Bayesian Classifier********************************************
         double[] naive_bayesian=pretraitement.Naive_Bayesian(train_test.train_disc,4,train_test.test_disc.get(0));
+        for(double element:naive_bayesian){
+            System.out.println(element);
+        }
+        //System.out.println(train_test.test_disc.get(0)[7]);
         /*for (String[] instance:train_test.train_disc) {
             System.out.print("**\t");
             for (String val:instance) {
