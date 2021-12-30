@@ -31,7 +31,7 @@ public class Main {
         for(int i = 0; i<ds.nb_Instances(); i++){
             dataset_disc.add(pretraitement.Discretisation2(ds,i,4));
         }
-
+        //afficher dataset_discrétisé
         /*for (String[] instance:dataset_disc) {
             System.out.print("**\t");
             for (String val:instance) {
@@ -74,31 +74,43 @@ public class Main {
             }
             System.out.println("\n");
         }*/
+        /*int[] frequences=new int[3];
+        for (int element:frequences) {
+            element=0;
+        }
 
-        //************************************************ Naive Bayesian Classifier********************************************
-        int naive_bayesian=pretraitement.predict_naive_bayesian(train_test.train_disc,4,train_test.test_disc.get(50));
-        /*for(double element:naive_bayesian){
+        for (int i = 0; i < train_test.train_disc.size(); i++) {
+            if(train_test.train_disc.get(i)[6].charAt(2)=='4'){
+                if(train_test.train_disc.get(i)[7].equals("1")){frequences[0]++;}
+                if(train_test.train_disc.get(i)[7].equals("2")){frequences[1]++;}
+                if(train_test.train_disc.get(i)[7].equals("3")){frequences[2]++;}
+            }
+
+        }
+
+        for (int element:frequences) {
             System.out.println(element);
-        }*/
-
-        for (String element:train_test.test_disc.get(50)) {
+        }
+        System.out.println(frequences[0]+frequences[1]+frequences[2]);
+        */
+        //************************************************ Naive Bayesian Classifier********************************************
+        for (int i = 0; i < train_test.test_disc.size(); i++) {
+            int naive_bayesian=pretraitement.predict_naive_bayesian(train_test.train_disc,4,train_test.test_disc.get(i));
+            for (String element:train_test.test_disc.get(i)) {
+                System.out.print(element+"\t");
+            }
+            System.out.print("\n");
+            System.out.println("Prediction="+naive_bayesian);
+        }
+        //int naive_bayesian=pretraitement.predict_naive_bayesian(train_test.train_disc,4,train_test.test_disc.get(50));
+        /*for (String element:train_test.test_disc.get(50)) {
             System.out.print(element+"\t");
         }
         System.out.print("\n");
-        System.out.println("Prediction="+naive_bayesian);
-        //System.out.println(train_test.test_disc.get(0)[7]);
-        /*for (String[] instance:train_test.train_disc) {
-            System.out.print("**\t");
-            for (String val:instance) {
-                System.out.print(val+"/");
-            }
-            System.out.println("\n");
-        }*/
-        //String mot="I21";
-        //System.out.println(Character.getNumericValue(mot.charAt(2))+1);
+        System.out.println("Prediction="+naive_bayesian);*/
 
         //************************************************ Confusion Matrix ********************************************
-        double[][] confusion_matrix=pretraitement.Confusion_matrix(train_test.train_disc,4,train_test.test_disc);
+        //double[][] confusion_matrix=pretraitement.Confusion_matrix(train_test.train_disc,4,train_test.test_disc);
     }
 
 }

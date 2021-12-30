@@ -417,10 +417,18 @@ public class pretraitement {
             proba_class2[intervalle-1]++;
             probas.set(classe-1,proba_class2);
         }
+        //to verify frequences of intervalls in each class for a given attribute (CHECKED)
+        /*System.out.println("Attribut:"+(attribute_index+1));
+        for (double[] liste:probas) {
+            for (double value:liste) {
+                System.out.print(value+"\t");
+            }
+            System.out.print("\n");
+        }*/
 
         for (int i = 0; i < probas.size(); i++) {
             for (int j = 0; j < probas.get(i).length; j++) {
-                probas.get(i)[j]=probas.get(i)[j]/(double)train_disc.size();
+                probas.get(i)[j]=probas.get(i)[j]/(double)((train_disc.size())/3.0);
             }
         }
         return probas;
@@ -433,6 +441,17 @@ public class pretraitement {
         for(int i=0;i<train_disc.get(0).length-1;i++){
             cond_probas.add(probas_per_attribute(train_disc,Q,i));
         }
+        //to verify final probas for each attribute (CHECKED)
+        /*for (int i = 0; i < cond_probas.size(); i++) {
+            System.out.println("Attribut:"+(i+1));
+            for (int j = 0; j < cond_probas.get(i).size(); j++) {
+                System.out.println("Classe:"+(j+1));
+                for (double val:cond_probas.get(i).get(j)) {
+                    System.out.print(val+"\t");
+                }
+                System.out.print("\n");
+            }
+        }*/
         return cond_probas;
     }
 
@@ -445,14 +464,14 @@ public class pretraitement {
         int attribut=1;
         int label=1;
         for (ArrayList<double[]> probas_array:cond_probas) {
-            System.out.println("Attribut:"+attribut);
+            //System.out.println("Attribut:"+attribut);
             for (double[] probas_list:probas_array) {
-                System.out.println("Classe:"+label);
+                //System.out.println("Classe:"+label);
                 for (double value:probas_list) {
-                    System.out.print(value+"\t");
+                    //System.out.print(value+"\t");
                 }
                 label++;
-                System.out.print("\n");
+                //System.out.print("\n");
             }
             attribut++;
             label=1;
@@ -468,9 +487,10 @@ public class pretraitement {
             }
 
         }
-        for(double element:naive_bayesian){
+        //print calculated probas for a given test instance
+        /*for(double element:naive_bayesian){
             System.out.println(element);
-        }
+        }*/
         return naive_bayesian;
     }
 
@@ -492,7 +512,7 @@ public class pretraitement {
         //ArrayList<double[][]> confusion_matrix=new ArrayList();
         double[][] confusion_matrix=new double[3][3];
 
-        //Initializa confusion_matrix
+        //Initialize confusion_matrix
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 confusion_matrix[i][j]=0;
@@ -500,7 +520,7 @@ public class pretraitement {
         }
         int predicted,real;
         for (int i = 0; i < test_disc.size(); i++) {
-            System.out.println(i);
+            //System.out.println(i);
             predicted=predict_naive_bayesian(train_disc,Q,test_disc.get(i));
             real=Integer.parseInt(test_disc.get(i)[7]);
             confusion_matrix[real-1][predicted-1]++;
