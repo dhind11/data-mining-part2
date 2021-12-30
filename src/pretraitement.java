@@ -338,6 +338,8 @@ public class pretraitement {
             System.out.print("{"+L2.get(i)[0]+","+L2.get(i)[1]+"}"+"\t");
         }
     }
+    /*************************************** frequent items ***********************************************************/
+
     /*************************************** Naive Bayesian ***********************************************************/
     /*public static void proba_bayes(Dataset train,Dataset test){
         ArrayList<String[]> train_disc=new ArrayList<>();
@@ -391,7 +393,7 @@ public class pretraitement {
     }
 
     //calcul probas per attribute
-    public static ArrayList<double[]> probas_per_attribute(ArrayList<String[]> dataset_disc,int Q,int attribute_index){
+    public static ArrayList<double[]> probas_per_attribute(ArrayList<String[]> train_disc,int Q,int attribute_index){
         ArrayList<double[]> probas=new ArrayList<>();//Q=4, probas de [(C1,C1,C1,C1),(C2,C2,C2,C2),(C3,C3,C3,C3)]
 
         for (int i = 0; i < 3; i++) {
@@ -402,10 +404,10 @@ public class pretraitement {
             probas.add(proba_class);
         }
 
-        for(int i=0;i<dataset_disc.size();i++){
+        for(int i=0;i<train_disc.size();i++){
             //System.out.println(i);
-            String value=dataset_disc.get(i)[attribute_index];
-            int classe=Integer.valueOf(dataset_disc.get(i)[7]);
+            String value=train_disc.get(i)[attribute_index];
+            int classe=Integer.valueOf(train_disc.get(i)[7]);
             //System.out.println("classe="+classe);
             char ch=value.charAt(2);
             int intervalle=Integer.parseInt(String.valueOf(ch));
@@ -418,27 +420,27 @@ public class pretraitement {
 
         for (int i = 0; i < probas.size(); i++) {
             for (int j = 0; j < probas.get(i).length; j++) {
-                probas.get(i)[j]=probas.get(i)[j]/(double)dataset_disc.size();
+                probas.get(i)[j]=probas.get(i)[j]/(double)train_disc.size();
             }
         }
         return probas;
     }
 
     //conditional probas
-    public static ArrayList<ArrayList<double[]>> Cond_probas(ArrayList<String[]> dataset_disc, int Q){
+    public static ArrayList<ArrayList<double[]>> Cond_probas(ArrayList<String[]> train_disc, int Q){
         ArrayList<ArrayList<double[]>> cond_probas=new ArrayList();
 
-        for(int i=0;i<dataset_disc.get(0).length-1;i++){
-            cond_probas.add(probas_per_attribute(dataset_disc,Q,i));
+        for(int i=0;i<train_disc.get(0).length-1;i++){
+            cond_probas.add(probas_per_attribute(train_disc,Q,i));
         }
         return cond_probas;
     }
 
-    //Naive bayesian
-    public static int Naive_Bayesian(ArrayList<String[]> dataset_disc,int Q,String[] instance){
+    //Naive bayesian obtained probas for each class
+    public static double[] Naive_Bayesian(ArrayList<String[]> train_disc,int Q,String[] instance){
         double[] naive_bayesian=new double[3];
-        double[] probas_classes=proba_per_classes(dataset_disc);//verified! 70 instance for each class
-        ArrayList<ArrayList<double[]>> cond_probas=Cond_probas(dataset_disc,Q);// 3 probabilities(3 classes) for each attribute(7 attributes)
+        double[] probas_classes=proba_per_classes(train_disc);//verified! 70 instance for each class
+        ArrayList<ArrayList<double[]>> cond_probas=Cond_probas(train_disc,Q);// 3 probabilities(3 classes) for each attribute(7 attributes)
 
         int attribut=1;
         int label=1;
@@ -457,16 +459,25 @@ public class pretraitement {
         }
         for (int i = 0; i < 3; i++) {
             naive_bayesian[i]=probas_classes[i];
-            System.out.println("Naive bayesian list at index:"+i+"="+naive_bayesian[i]);
+            //System.out.println("Naive bayesian list at index:"+i+"="+naive_bayesian[i]);
             for (int j = 0; j < instance.length-1; j++) {
                 int intervalle=Integer.parseInt(String.valueOf(instance[j].charAt(2)));
                 //System.out.println("i="+i+"/j="+j+"/intervalle="+intervalle);
-                System.out.println("cond proba at index:"+j+"="+cond_probas.get(j).get(i)[intervalle-1]);
+                //System.out.println("cond proba at index:"+j+"="+cond_probas.get(j).get(i)[intervalle-1]);
                 naive_bayesian[i]=(double)naive_bayesian[i]*(double)((cond_probas.get(j).get(i))[intervalle-1]);
             }
 
         }
-        //return naive_bayesian;
+        for(double element:naive_bayesian){
+            System.out.println(element);
+        }
+        return naive_bayesian;
+    }
+
+    //Prediction de la classe avec naive bayesian
+    public static int predict_naive_bayesian(ArrayList<String[]> train_disc,int Q,String[] instance){
+        double[] naive_bayesian=new double[3];
+        naive_bayesian=Naive_Bayesian(train_disc,Q,instance);
         int classification=0;
         for (int i = 1; i < naive_bayesian.length; i++) {
             if(naive_bayesian[classification]<naive_bayesian[i]){
@@ -474,5 +485,32 @@ public class pretraitement {
             }
         }
         return (classification+1);
+    }
+
+    //Confusion Matrix
+    public static double[][] Confusion_matrix(ArrayList<String[]> train_disc,int Q,ArrayList<String[]> test_disc){
+        //ArrayList<double[][]> confusion_matrix=new ArrayList();
+        double[][] confusion_matrix=new double[3][3];
+
+        //Initializa confusion_matrix
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                confusion_matrix[i][j]=0;
+            }
+        }
+        int predicted,real;
+        for (int i = 0; i < test_disc.size(); i++) {
+            System.out.println(i);
+            predicted=predict_naive_bayesian(train_disc,Q,test_disc.get(i));
+            real=Integer.parseInt(test_disc.get(i)[7]);
+            confusion_matrix[real-1][predicted-1]++;
+        }
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                System.out.print(confusion_matrix[i][j]+"\t\t");
+            }
+            System.out.print("\n");
+        }
+        return confusion_matrix;
     }
 }

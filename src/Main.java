@@ -76,12 +76,12 @@ public class Main {
         }*/
 
         //************************************************ Naive Bayesian Classifier********************************************
-        int naive_bayesian=pretraitement.Naive_Bayesian(train_test.train_disc,4,train_test.test_disc.get(0));
+        int naive_bayesian=pretraitement.predict_naive_bayesian(train_test.train_disc,4,train_test.test_disc.get(50));
         /*for(double element:naive_bayesian){
             System.out.println(element);
         }*/
 
-        for (String element:train_test.test_disc.get(0)) {
+        for (String element:train_test.test_disc.get(50)) {
             System.out.print(element+"\t");
         }
         System.out.print("\n");
@@ -96,6 +96,9 @@ public class Main {
         }*/
         //String mot="I21";
         //System.out.println(Character.getNumericValue(mot.charAt(2))+1);
+
+        //************************************************ Confusion Matrix ********************************************
+        double[][] confusion_matrix=pretraitement.Confusion_matrix(train_test.train_disc,4,train_test.test_disc);
     }
 
 }
