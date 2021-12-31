@@ -6,11 +6,11 @@ import java.util.*;
 
 public class pretraitement {
     /*************************************** Normalization ***********************************************************/
-    private static double MinMaxNorm (double val, double min, double max){
-        return (val - min)/(max-min) ;
+    private static double MinMaxNorm(double val, double min, double max) {
+        return (val - min) / (max - min);
     }
 
-    public static double[] MinMaxNormalization (Dataset ds, int instance_index){
+    public static double[] MinMaxNormalization(Dataset ds, int instance_index) {
         double[] instance = ds.getInstance(instance_index);
         double[] new_instance = new double[instance.length];
 
@@ -20,48 +20,47 @@ public class pretraitement {
         return new_instance;
     }
 
-    private static double calcul_S (Dataset ds, int index_att, double moyenne){
+    private static double calcul_S(Dataset ds, int index_att, double moyenne) {
         double S = 0;
         double[] column = ds.getColumn(index_att);
         //double moyenne = Calcul.moy(ds, index_att);
 
         for (int i = 0; i < column.length; i++) {
-            S = S + Math.abs( column[i] -  moyenne);
+            S = S + Math.abs(column[i] - moyenne);
         }
-        S = S /  ds.nb_Instances(); // 1/N
+        S = S / ds.nb_Instances(); // 1/N
         return S;
     }
 
-    public static double[] ZscoreNormalization (Dataset ds, int instance_index){
+    public static double[] ZscoreNormalization(Dataset ds, int instance_index) {
         double[] instance = ds.getInstance(instance_index);
         double[] new_instance = new double[instance.length];
 
         for (int i = 0; i < new_instance.length; i++) {
             double moyenne = Calcul.moy(ds, i);
-            new_instance[i] = (instance[i] - moyenne) / (calcul_S(ds, i, moyenne)) ;
+            new_instance[i] = (instance[i] - moyenne) / (calcul_S(ds, i, moyenne));
         }
         return new_instance;
     }
 
-    private static double[] normal_col(Dataset ds, int index_att, int norm){
+    private static double[] normal_col(Dataset ds, int index_att, int norm) {
         //Cette fonction retourne une colonne normalisée
         // norm = 0 -> MinMax normalization  ;  norm = 1 -> Z-Score normalization
-        double [] column = ds.getColumn(index_att);
-        double [] new_column = new double[column.length];
+        double[] column = ds.getColumn(index_att);
+        double[] new_column = new double[column.length];
         if (norm == 0) { // MinMax normalization
             for (int i = 0; i < column.length; i++) {
-                new_column[i] = MinMaxNormalization (ds, i)[index_att];
+                new_column[i] = MinMaxNormalization(ds, i)[index_att];
             }
-        }
-        else{ // Z-Score normalization
+        } else { // Z-Score normalization
             for (int i = 0; i < column.length; i++) {
-                new_column[i] = ZscoreNormalization (ds, i)[index_att];
+                new_column[i] = ZscoreNormalization(ds, i)[index_att];
             }
         }
-        return  new_column;
+        return new_column;
     }
 
-    public static double[] bornes(Dataset ds, double[] attribut_col , int Q){
+    public static double[] bornes(Dataset ds, double[] attribut_col, int Q) {
         //fonction qui permet de calculer les bornes des intervalles pour la discretisation en classes d'effectifs egaux
         int nb_inst = (int) Math.ceil(ds.nb_Instances() / Q); //Nombre d'instances par intervalle.
 
@@ -72,200 +71,207 @@ public class pretraitement {
 
         for (int i = 1; i < Q; i++) {
             int indice_quantile = nb_inst * i - 1;
-            bornes_sup[i-1] = attribut_col[indice_quantile];
+            bornes_sup[i - 1] = attribut_col[indice_quantile];
         }
-        bornes_sup[Q-1] = attribut_col[attribut_col.length-1]; //la borne sup du dernier intervalle
+        bornes_sup[Q - 1] = attribut_col[attribut_col.length - 1]; //la borne sup du dernier intervalle
 
         return bornes_sup;
     }
+
     /*************************************** Discretisation ***********************************************************/
-    public static String[] Discretisation (Dataset ds, int instance_index,  int Q){
+    public static String[] Discretisation(Dataset ds, int instance_index, int Q) {
         //Discretisation en classes d'effectifs egaux (Equal-frequency)
 
         //double [] instance = ds.getInstance(instance_index);
-        double [] instance = pretraitement.MinMaxNormalization(ds, instance_index);
-        String[] new_instance = new String[instance.length-1];
+        double[] instance = pretraitement.MinMaxNormalization(ds, instance_index);
+        String[] new_instance = new String[instance.length - 1];
 
-        for (int i = 0; i < instance.length - 1 ; i++) {
+        for (int i = 0; i < instance.length - 1; i++) {
             double[] attribut_col = normal_col(ds, i, 0);
             double[] bornes_sup = bornes(ds, attribut_col, Q); //Recuperer les bornes superieur des intervalles de cette attributs
             double borne_sup = bornes_sup[0];
             int num_intervalle = 1;
             //Pour la valeur : trouver le num de l'intervalle (en comparant la valeur avec la borne sup des intervalles)
-            while (borne_sup <= bornes_sup[Q-1]){   // bornes_sup[Q-1] : borne max
+            while (borne_sup <= bornes_sup[Q - 1]) {   // bornes_sup[Q-1] : borne max
                 if (instance[i] < borne_sup) {
                     break;
-                }
-                else if(instance[i] >= borne_sup) {
+                } else if (instance[i] >= borne_sup) {
                     //System.out.print("I'm here");
                     borne_sup = bornes_sup[num_intervalle];
                     num_intervalle = num_intervalle + 1;
                 }
             }
-            new_instance[i] = "I" + (i+1) + num_intervalle;
+            new_instance[i] = "I" + (i + 1) + num_intervalle;
         }
         return new_instance;
     }
 
-    public static String[] Discretisation2 (Dataset ds, int instance_index,  int Q){
+    public static String[] Discretisation2(Dataset ds, int instance_index, int Q) {
         //Discretisation en classes d'amplitudes égales
         double min = 0;
         double max = 1;
-        double width = 1 / (double)Q;  // On considere l'intervalle [0,1]
+        double width = 1 / (double) Q;  // On considere l'intervalle [0,1]
         //System.out.print("width="+width);
         //double width = (min - max) / (double)Q;
 
         //double [] instance = ds.getInstance(instance_index);
-        double [] instance = pretraitement.MinMaxNormalization(ds, instance_index);
-        String[] new_instance = new String[instance.length-1];
+        double[] instance = pretraitement.MinMaxNormalization(ds, instance_index);
+        String[] new_instance = new String[instance.length - 1];
 
-        for (int i = 0; i < instance.length - 1 ; i++) {
+        for (int i = 0; i < instance.length - 1; i++) {
             double borne_sup = min + width;
             int num_intervalle = 1;
             while (borne_sup <= max) {
-                if (instance[i] < borne_sup || instance[i]==max) {
+                if (instance[i] < borne_sup || instance[i] == max) {
                     break;
-                }
-                else if(instance[i] >= borne_sup) {
+                } else if (instance[i] >= borne_sup) {
                     borne_sup = borne_sup + width;
                     num_intervalle = num_intervalle + 1;
                 }
             }
             //System.out.print("\t " + num_intervalle);
-            new_instance[i] = "I" + (i+1) + num_intervalle;
+            new_instance[i] = "I" + (i + 1) + num_intervalle;
         }
         return new_instance;
     }
+
     /*************************************** Itemsets ***********************************************************/
-    public static int calcul_support (String A,ArrayList<String[]> dataset_disc){
+    public static int calcul_support(String A, ArrayList<String[]> dataset_disc) {
         int support = 0;
-        for(int i=0;i<dataset_disc.size();i++){
-            String[] ligne=dataset_disc.get(i);
-            for(int j=0;j<ligne.length;j++){
-                if(ligne[j].equals(A)){support++;}
+        for (int i = 0; i < dataset_disc.size(); i++) {
+            String[] ligne = dataset_disc.get(i);
+            for (int j = 0; j < ligne.length; j++) {
+                if (ligne[j].equals(A)) {
+                    support++;
+                }
             }
         }
         return support;
 
     }
 
-    public static int item_exist (ArrayList<ElementC1> C1, String element_id){
-        for (int i = 0; i< C1.size(); i++) {
-            if (C1.get(i).itemset.equals(element_id)){
+    public static int item_exist(ArrayList<ElementC1> C1, String element_id) {
+        for (int i = 0; i < C1.size(); i++) {
+            if (C1.get(i).itemset.equals(element_id)) {
                 return i;
             }
         }
         return -1;
     }
 
-    public static ArrayList<ElementC1> Create_itemset1 (Dataset ds, int min_sup, int Q){
+    public static ArrayList<ElementC1> Create_itemset1(Dataset ds, int min_sup, int Q) {
 
         ArrayList<String[]> dataset_disc = new ArrayList<>(); // dataset discretisée
-        for(int i = 0; i<ds.nb_Instances(); i++){
-            dataset_disc.add(Discretisation2(ds,i,Q));
+        for (int i = 0; i < ds.nb_Instances(); i++) {
+            dataset_disc.add(Discretisation2(ds, i, Q));
         }
 
         ArrayList<ElementC1> C1 = new ArrayList<>();
-        for (int i = 0; i< dataset_disc.size(); i++){
+        for (int i = 0; i < dataset_disc.size(); i++) {
 
-            for(int j=0; j<dataset_disc.get(i).length; j++ ){
+            for (int j = 0; j < dataset_disc.get(i).length; j++) {
 
                 String element_id = dataset_disc.get(i)[j];
                 //ElementC1 element = new ElementC1(element_id,0);
 
-                int position = item_exist(C1,element_id);
-                if (position != -1){      // il existe
-                    C1.get(position).freq ++;
-                }
-                else {
-                    ElementC1 element = new ElementC1(element_id,1);
+                int position = item_exist(C1, element_id);
+                if (position != -1) {      // il existe
+                    C1.get(position).freq++;
+                } else {
+                    ElementC1 element = new ElementC1(element_id, 1);
                     C1.add(element);
                 }
 
             }
 
         }
-        return(C1);
+        return (C1);
         //printC1(C1);
 
     }
 
-    public static void printC1 (ArrayList<ElementC1> C1){
+    public static void printC1(ArrayList<ElementC1> C1) {
         System.out.print("C1=\t");
-        for (int i = 0; i< C1.size(); i++){
-            System.out.print("{" + C1.get(i).itemset + "}:"+ C1.get(i).freq +",");
+        for (int i = 0; i < C1.size(); i++) {
+            System.out.print("{" + C1.get(i).itemset + "}:" + C1.get(i).freq + ",");
         }
     }
 
-    public static ArrayList<String> Create_L1(Dataset ds, int min_sup,ArrayList<ElementC1> C1){
-        int support_min=(ds.nb_Instances())*min_sup/100;
-        ArrayList<String> L1=new ArrayList<>();
-        for(int i=0;i<C1.size();i++){
-            if(C1.get(i).freq>=support_min){
+    public static ArrayList<String> Create_L1(Dataset ds, int min_sup, ArrayList<ElementC1> C1) {
+        int support_min = (ds.nb_Instances()) * min_sup / 100;
+        ArrayList<String> L1 = new ArrayList<>();
+        for (int i = 0; i < C1.size(); i++) {
+            if (C1.get(i).freq >= support_min) {
                 L1.add(C1.get(i).itemset);
             }
         }
         return L1;
     }
 
-    public static void printL1 (ArrayList<String> L1){
+    public static void printL1(ArrayList<String> L1) {
         System.out.print("L1=\t");
-        for(int j=0;j<L1.size();j++){
-            System.out.print("{"+L1.get(j)+"}\t");
+        for (int j = 0; j < L1.size(); j++) {
+            System.out.print("{" + L1.get(j) + "}\t");
         }
     }
 
-    public static int calcul_support2 (String[] A,ArrayList<String[]> dataset_disc){
+    public static int calcul_support2(String[] A, ArrayList<String[]> dataset_disc) {
         int support = 0;
-        for(int i=0;i<dataset_disc.size();i++){
-            String[] ligne=dataset_disc.get(i);
-            boolean found=false;
-            int j=0;
-            while(j<(ligne.length)-1){
-                int k=1;
-                while(k<(ligne.length)) {
+        for (int i = 0; i < dataset_disc.size(); i++) {
+            String[] ligne = dataset_disc.get(i);
+            boolean found = false;
+            int j = 0;
+            while (j < (ligne.length) - 1) {
+                int k = 1;
+                while (k < (ligne.length)) {
                     if (!ligne[j].equals(ligne[k])) {
                         if (A[0].equals(ligne[j]) || A[1].equals(ligne[j])) {
                             if (A[0].equals(ligne[k]) || A[1].equals(ligne[k])) {
                                 support++;
-                                found=true;
+                                found = true;
                             }
                         }
                     }
-                    if(found){break;}
-                    else{k++;}
+                    if (found) {
+                        break;
+                    } else {
+                        k++;
+                    }
                 }
-                if(found){break;}
-                else{j++;}
+                if (found) {
+                    break;
+                } else {
+                    j++;
+                }
             }
         }
         return support;
     }
 
-    public static ArrayList<String[]> Create_itemset2(Dataset ds,ArrayList<String> L1,int Q){
+    public static ArrayList<String[]> Create_itemset2(Dataset ds, ArrayList<String> L1, int Q) {
 
         ArrayList<String[]> dataset_disc = new ArrayList<>(); // dataset discretisée
-        for(int i = 0; i<ds.nb_Instances(); i++){
-            dataset_disc.add(Discretisation2(ds,i,Q));
+        for (int i = 0; i < ds.nb_Instances(); i++) {
+            dataset_disc.add(Discretisation2(ds, i, Q));
         }
 
-        String I1,I2;
-        ArrayList<String[]> C2=new ArrayList<>();
+        String I1, I2;
+        ArrayList<String[]> C2 = new ArrayList<>();
 
-        for(int i=0;i<(L1.size())-1;i++){
-            I1=L1.get(i);
-            int j=i+1;
-            while(j<L1.size()){
-                I2=L1.get(j);
+        for (int i = 0; i < (L1.size()) - 1; i++) {
+            I1 = L1.get(i);
+            int j = i + 1;
+            while (j < L1.size()) {
+                I2 = L1.get(j);
                 //if(!(I1.equals(I2))){
-                    String[] temp_itemset2=new String[3];
-                    temp_itemset2[0]=I1;
-                    temp_itemset2[1]=I2;
-                    String[] A=new String[2];
-                    A[0]=I1;
-                    A[1]=I2;
-                    temp_itemset2[2]=String.valueOf(calcul_support2(A,dataset_disc));
-                    C2.add(temp_itemset2);
+                String[] temp_itemset2 = new String[3];
+                temp_itemset2[0] = I1;
+                temp_itemset2[1] = I2;
+                String[] A = new String[2];
+                A[0] = I1;
+                A[1] = I2;
+                temp_itemset2[2] = String.valueOf(calcul_support2(A, dataset_disc));
+                C2.add(temp_itemset2);
                 //}
                 j++;
             }
@@ -273,34 +279,33 @@ public class pretraitement {
         return (C2);
     }
 
-    public static void printC2(ArrayList<String[]> C2){
-        for(int i=0;i<C2.size();i++){
-            System.out.print("{"+C2.get(i)[0]+","+C2.get(i)[1]+"}:"+C2.get(i)[2]+"\t");
+    public static void printC2(ArrayList<String[]> C2) {
+        for (int i = 0; i < C2.size(); i++) {
+            System.out.print("{" + C2.get(i)[0] + "," + C2.get(i)[1] + "}:" + C2.get(i)[2] + "\t");
         }
     }
 
-    public static  ArrayList<String[]> sort_L2(ArrayList<String[]> L2){
+    public static ArrayList<String[]> sort_L2(ArrayList<String[]> L2) {
         String item;
-        ArrayList<String[]> new_L2=new ArrayList<>();
-        ArrayList<String> items1=new ArrayList<>();
-        for(int i=0;i<L2.size();i++) {
+        ArrayList<String[]> new_L2 = new ArrayList<>();
+        ArrayList<String> items1 = new ArrayList<>();
+        for (int i = 0; i < L2.size(); i++) {
             item = L2.get(i)[0];
             if (!items1.contains(item)) {
                 items1.add(item);
             }
         }
         Collections.sort(items1); //L2 is a set of elements like {x,y} sort the x parts and put them in items1
-        SortedSet<String> items2= new TreeSet<>(); //will be used temporarely to sort the y in {x,y}
+        SortedSet<String> items2 = new TreeSet<>(); //will be used temporarely to sort the y in {x,y}
         //now items1 is sorted
 
-        for(int i=0;i<items1.size();i++) { //parcourir les x et les y
+        for (int i = 0; i < items1.size(); i++) { //parcourir les x et les y
             for (int j = 0; j < L2.size(); j++) {
                 if (L2.get(j)[0].equals(items1.get(i))) {
                     item = L2.get(j)[1];
                     items2.add(item);
                     //j++;
-                }
-                else {
+                } else {
                     //items2 is automatically sorted
                     Iterator<String> iter = items2.iterator();
                     while (iter.hasNext()) {
@@ -314,31 +319,115 @@ public class pretraitement {
 
             }
         }
-        return(new_L2);
+        return (new_L2);
     }
 
-    public static ArrayList<String[]> Create_L2(Dataset ds, int min_sup,ArrayList<String[]> C2){
-        int support_min=(ds.nb_Instances())*min_sup/100;
-        ArrayList<String[]> L2=new ArrayList<>();
-        for(int i=0;i<C2.size();i++){
+    public static ArrayList<String[]> Create_L2(Dataset ds, int min_sup, ArrayList<String[]> C2) {
+        int support_min = (ds.nb_Instances()) * min_sup / 100;
+        ArrayList<String[]> L2 = new ArrayList<>();
+        for (int i = 0; i < C2.size(); i++) {
 
-            if(Integer.valueOf(C2.get(i)[2])>=support_min ){
+            if (Integer.valueOf(C2.get(i)[2]) >= support_min) {
                 L2.add(C2.get(i));
                 //System.out.println("items:"+C2.get(i)[0]+C2.get(i)[1]+" Support="+Integer.valueOf(C2.get(i)[2]));
 
             }
         }
-        L2=sort_L2(L2);
+        L2 = sort_L2(L2);
         return (L2);
     }
 
-    public static void printL2(ArrayList<String[]> L2){
-        for(int i=0;i<L2.size();i++){
+    public static void printL2(ArrayList<String[]> L2) {
+        for (int i = 0; i < L2.size(); i++) {
             //System.out.print("{"+L2.get(i)[0]+","+L2.get(i)[1]+"}:"+L2.get(i)[2]+"\t");
-            System.out.print("{"+L2.get(i)[0]+","+L2.get(i)[1]+"}"+"\t");
+            System.out.print("{" + L2.get(i)[0] + "," + L2.get(i)[1] + "}" + "\t");
         }
     }
+
     /*************************************** frequent items ***********************************************************/
+    public static ArrayList<String> Common_items(ArrayList<String> items1,ArrayList<String> items2){
+        ArrayList<String> temp_items=new ArrayList<>();
+        for (int i = 0; i < items1.size(); i++) {
+            if (items2.contains(items1.get(i))) {
+                temp_items.add(items1.get(i));
+            }
+        }
+        return temp_items;
+    }
+
+    public static ArrayList<String> Combine_items(ArrayList<String> items1,ArrayList<String> items2){
+        ArrayList<String> combined_itemsets=new ArrayList();
+        ArrayList<String> temp_items=new ArrayList<>();
+        ArrayList<String> common_items=new ArrayList<>();
+        //copy common_items to temp_items
+        for (int i = 0; i < common_items.size() ; i++) {
+            temp_items.add(common_items.get(i));
+        }
+        //copy diff items to temp_items
+        for (int j = 0; j < items1.size(); j++) {
+            if(! common_items.contains(items1.get(j))){temp_items.add(items1.get(j));}
+            if(! common_items.contains(items2.get(j))){temp_items.add(items2.get(j));}
+        }
+        return combined_itemsets;
+    }
+
+    public static int calcul_supportk(ArrayList<String[]> dataset_disc,ArrayList<String> combined_items) {
+        int support=0;
+        int nb_exist=0;
+        ArrayList<String> instance=new ArrayList<>();
+
+        for (int i = 0; i < dataset_disc.size(); i++) {
+            //convert instance of dataset_disc, from [] to arraylist
+            for (String element:dataset_disc.get(i)) {
+                instance.add(element);
+            }
+            //compare if instance elements CONTAINS combined_items elements
+            for (int j = 0; j < combined_items.size(); j++) {
+                if (instance.contains(combined_items.get(i))) {
+                    nb_exist++;
+                }
+            }
+            if(nb_exist==combined_items.size()){support++;}
+            nb_exist=0;
+        }
+        return support;
+    }
+
+    public static void generate_Ck(ArrayList<String[]> dataset_disc,int min_sup,ArrayList<Itemset_Element> Lk) {
+        ArrayList<Itemset_Element> Ck = new ArrayList();
+        ArrayList<String> combined_items=new ArrayList<>();
+        int support;
+
+
+        for (int i = 0; i < Lk.size()-1; i++) {
+            if(Lk.get(i).support>=min_sup){
+                for (int j = i+1; j < Lk.size(); j++) {
+                    if(Lk.get(j).support>=min_sup){
+                        combined_items=Combine_items(Lk.get(i).items,Lk.get(j).items);
+                        support=calcul_supportk(dataset_disc,combined_items);
+                        Itemset_Element temp_Ck_element=new Itemset_Element(combined_items,support);
+                        Ck.add(temp_Ck_element);
+                        }
+                    }
+                }
+            }
+
+        }
+
+    public static ArrayList<String[]> generate_Lk(int min_sup,ArrayList<String[]> Ck,int k){
+        ArrayList<String[]> Lk=new ArrayList();
+        String[] element_Lk=new String[k+1];// le +1 c'est pour le support
+
+        for (int i = 0; i < Ck.size(); i++) {
+            if(Integer.parseInt(String.valueOf(Ck.get(i)[k]))<=min_sup){
+                for (int j = 0; j < Ck.get(i).length; j++) {
+                    element_Lk[j]=Ck.get(i)[j];
+                }
+                Lk.add(element_Lk);
+            }
+        }
+        return(Lk);
+    }
 
     /*************************************** Naive Bayesian ***********************************************************/
     /*public static void proba_bayes(Dataset train,Dataset test){
@@ -525,12 +614,30 @@ public class pretraitement {
             real=Integer.parseInt(test_disc.get(i)[7]);
             confusion_matrix[real-1][predicted-1]++;
         }
-        for (int i = 0; i < 3; i++) {
+        //afficher matrice de confusion
+        /*for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 System.out.print(confusion_matrix[i][j]+"\t\t");
             }
             System.out.print("\n");
-        }
+        }*/
         return confusion_matrix;
+    }
+
+    //Mini matrices
+    public static ArrayList<int[][]> Mini_confusion_matrix(ArrayList<String[]> train_disc,int Q,ArrayList<String[]> test_disc){
+        ArrayList<int[][]> mini_confusion_matrix=new ArrayList();
+        int predicted,real;
+
+        for(int i = 0; i<3; i++) {
+            for (int j = 0; j < test_disc.size(); j++) {
+                //System.out.println(i);
+                predicted = predict_naive_bayesian(train_disc, Q, test_disc.get(i));
+                real = Integer.parseInt(test_disc.get(i)[7]);
+
+                mini_confusion_matrix.get(i)[real - 1][predicted - 1]++;
+            }
+        }
+        return mini_confusion_matrix;
     }
 }

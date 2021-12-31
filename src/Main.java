@@ -110,7 +110,7 @@ public class Main {
         System.out.println("Prediction="+naive_bayesian);*/
 
         //************************************************ Confusion Matrix ********************************************
-        //double[][] confusion_matrix=pretraitement.Confusion_matrix(train_test.train_disc,4,train_test.test_disc);
+        double[][] confusion_matrix=pretraitement.Confusion_matrix(train_test.train_disc,4,train_test.test_disc);
     }
 
 }
