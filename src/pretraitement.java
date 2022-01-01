@@ -384,31 +384,51 @@ public class pretraitement {
     }
 
     public static ArrayList<String> Common_items(ArrayList<String> items1,ArrayList<String> items2){
-        ArrayList<String> temp_items=new ArrayList<>();
+        ArrayList<String> common_items=new ArrayList<>();
         for (int i = 0; i < items1.size(); i++) {
-            if (items2.contains(items1.get(i))) {
+            if(items2.contains(items1.get(i))){
+                common_items.add(items1.get(i));
+            }
+        }
+        return common_items;
+    }
+
+    public static ArrayList<String> Combine_items(ArrayList<String> items1,ArrayList<String> items2,ArrayList<String> common_items){
+        //ArrayList<String> combined_itemsets=new ArrayList();
+        ArrayList<String> temp_items=new ArrayList<>();
+        boolean exists;
+
+        //remplir temp_items avec common_items
+        for (int i = 0; i < common_items.size(); i++) {
+            temp_items.add(common_items.get(i));
+        }
+        //remplir temp_items avec itesm1 qui ne sont pas dans common items
+        for (int i = 0; i < items1.size(); i++) {
+            exists=false;
+            for (int j = 0; j < common_items.size(); j++) {
+                if(items1.get(i).equals(common_items.get(j))){
+                    exists=true;
+                    break;
+                }
+            }
+            if(!exists){
                 temp_items.add(items1.get(i));
             }
         }
-        return temp_items;
-    }
-
-    public static ArrayList<String> Combine_items(ArrayList<String> items1,ArrayList<String> items2){
-        ArrayList<String> combined_itemsets=new ArrayList();
-        ArrayList<String> temp_items=new ArrayList<>();
-        ArrayList<String> common_items=new ArrayList<>();
-
-        common_items=Common_items(items1,items2);
-
-        //copy common_items to temp_items
-        for (int i = 0; i < common_items.size() ; i++) {
-            temp_items.add(common_items.get(i));
+        //remplir temp_items avec itesm2 qui ne sont pas dans common items
+        for (int i = 0; i < items1.size(); i++) {
+            exists=false;
+            for (int j = 0; j < common_items.size(); j++) {
+                if(items2.get(i).equals(common_items.get(j))){
+                    exists=true;
+                    break;
+                }
+            }
+            if(!exists){
+                temp_items.add(items2.get(i));
+            }
         }
-        //copy diff items to temp_items
-        for (int j = 0; j < items1.size(); j++) {
-            if(!common_items.contains(items1.get(j))){temp_items.add(items1.get(j));}
-            if(!common_items.contains(items2.get(j))){temp_items.add(items2.get(j));}
-        }
+
         return temp_items;
     }
 
@@ -435,35 +455,68 @@ public class pretraitement {
         return support;
     }
 
+    public static boolean In_Ck(ArrayList<Itemset_Element> Ck,ArrayList<String> combined_items){
+        boolean contained=false;
+        for (int i = 0; i < Ck.size(); i++) {
+            for (int j = 0; j < combined_items.size(); j++) {
+                if(Ck.get(i).items.contains(combined_items.get(j))){
+                    contained=true;
+                }
+                else{
+                    contained=false;
+                    break;
+                }
+            }
+            if (contained){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static ArrayList<Itemset_Element> generate_Ck(ArrayList<String[]> dataset_disc,int min_sup,ArrayList<Itemset_Element> Lk,int k) {
         ArrayList<Itemset_Element> Ck = new ArrayList();
-
         int support;
+
         if (k > 1) {
-            for (int i = 0; i < Lk.size() - 1; i++){
-                if (Lk.get(i).support >= min_sup) {
-                    for (int j = (i+1); j < Lk.size(); j++) {
-                        if (Lk.get(j).support >= min_sup) {
+            for (int i = 0; i < (Lk.size()-1); i++) {
+                ArrayList<String> items1=new ArrayList<>();
+                items1=Lk.get(i).items;
+                for (int j = (i+1); j < Lk.size(); j++) {
+                    ArrayList<String> items2=new ArrayList<>();
+                    items2=Lk.get(j).items;
+                    if(k==2){
+                        ArrayList<String> combined_items = new ArrayList<>();
+                        combined_items.add(Lk.get(i).items.get(0));
+                        combined_items.add(Lk.get(j).items.get(0));
+                        support = calcul_supportk(dataset_disc, combined_items);
+                        Itemset_Element temp_Ck_element = new Itemset_Element(combined_items, support);
+                        Ck.add(temp_Ck_element);
+                    }
+                    else {
+                        ArrayList<String> common_items = new ArrayList<>();
+                        common_items = Common_items(items1, items2);
+                        if (common_items.size() == (k - 2)) {
                             ArrayList<String> combined_items = new ArrayList<>();
-                            combined_items = Combine_items(Lk.get(i).items, Lk.get(j).items);//empty, why?
-                            //System.out.println(combined_items.size());
+                            combined_items = Combine_items(items1, items2, common_items);
                             support = calcul_supportk(dataset_disc, combined_items);
                             Itemset_Element temp_Ck_element = new Itemset_Element(combined_items, support);
-                            Ck.add(temp_Ck_element);
+                            if(!In_Ck(Ck,combined_items)){
+                                Ck.add(temp_Ck_element);
+                            }
                         }
                     }
                 }
             }
-            return Ck;
         }
         else{
             ArrayList<Itemset_Element> C1=Create_C1(dataset_disc);
             return C1;
         }
-
+    return Ck;
     }
 
-    public static ArrayList<Itemset_Element> generate_Lk(ArrayList<Itemset_Element> Ck,int min_sup,int k){
+    public static ArrayList<Itemset_Element> generate_Lk(ArrayList<Itemset_Element> Ck,int min_sup){
         ArrayList<Itemset_Element> Lk=new ArrayList();
         //Itemset_Element element_Lk=new ArrayList<>();
 
@@ -476,6 +529,35 @@ public class pretraitement {
         return(Lk);
     }
 
+    public static ArrayList<Itemset_Element> Apriori(ArrayList<String[]> dataset_disc,int pourcentage_min_sup){
+        ArrayList<Itemset_Element> frequent_items=new ArrayList<>();
+
+        ArrayList<Itemset_Element> Ck=new ArrayList<>();
+        ArrayList<Itemset_Element> Lk=new ArrayList<>();
+        int min_sup=(dataset_disc.size()*pourcentage_min_sup)/100;//add lower
+        int k=1;//to reference L1 L2 L3.. & C1 C2 C3....
+
+        //Create C1 and L1
+        Ck=Create_C1(dataset_disc);
+        Lk=generate_Lk(Ck,min_sup);
+        //add L1 to frequent items
+        for (Itemset_Element element:Lk) {
+            frequent_items.add(element);
+        }
+        k++;
+        while(Lk.size()>2){
+            Ck.clear();
+            Ck=generate_Ck(dataset_disc,min_sup,Lk,k);
+            Lk.clear();
+            Lk=generate_Lk(Ck,min_sup);
+            //add Lk to frequent items
+            for (Itemset_Element element:Lk) {
+                frequent_items.add(element);
+            }
+            k++;
+        }
+        return (frequent_items);
+    }
     /*************************************** Naive Bayesian ***********************************************************/
     /*public static void proba_bayes(Dataset train,Dataset test){
         ArrayList<String[]> train_disc=new ArrayList<>();

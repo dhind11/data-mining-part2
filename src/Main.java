@@ -55,7 +55,7 @@ public class Main {
             System.out.print(":"+element.support+"/\t");
         }
         /************************************************ create L1 ********************************************/
-        System.out.println("\n********************************************* L1 *********************************************");
+        /*System.out.println("\n********************************************* L1 *********************************************");
         ArrayList<Itemset_Element> L1=new ArrayList<>();
         int min_sup=(ds.nb_Instances()*20)/100;
         L1=pretraitement.generate_Lk(C1,min_sup,1);
@@ -64,9 +64,9 @@ public class Main {
                 System.out.print(item+"\t");
             }
             System.out.print(":"+element.support+"/\t");
-        }
+        }*/
         /************************************************ create C2 ********************************************/
-        System.out.println("\n********************************************* C2 *********************************************");
+        /*System.out.println("\n********************************************* C2 *********************************************");
         ArrayList<Itemset_Element> C2=new ArrayList<>();
         C2=pretraitement.generate_Ck(dataset_disc,min_sup,L1,2);
         for(Itemset_Element element:C2){
@@ -74,17 +74,28 @@ public class Main {
                 System.out.print(item+"\t");
             }
             System.out.print(":"+element.support+"/\t");
-        }
+        }*/
         /************************************************ create L2 ********************************************/
-        System.out.println("\n********************************************* L2 *********************************************");
+        /*System.out.println("\n********************************************* L2 *********************************************");
         ArrayList<Itemset_Element> L2=new ArrayList<>();
         L2=pretraitement.generate_Lk(C2,min_sup,2);
         for(Itemset_Element element:L2){
             for (String item:element.items) {
                 System.out.print(item+"\t");
             }
+            System.out.print(":"+element.support+"/\t");
+        }*/
+        /******************************************************** APRIORI ****************************************************/
+        System.out.println("\n********************************************* APRIORI *********************************************");
+        ArrayList<Itemset_Element> apriori=new ArrayList<>();
+        apriori=pretraitement.Apriori(dataset_disc,20);
+        for(Itemset_Element element:apriori){
+            for (String item:element.items) {
+                System.out.print(item+"\t");
+            }
             System.out.print(":"+element.support+"\n");
         }
+
         /************************************************ Train Test Splitting ********************************************/
         //train parameter here is an int that gives you the number of lines per class, if train=20, u take 20 each class
         Train_Test train_test= new Train_Test(ds,50,4);
