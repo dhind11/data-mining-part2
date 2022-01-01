@@ -98,7 +98,7 @@ public class Main {
 
         /************************************************ Train Test Splitting ********************************************/
         //train parameter here is an int that gives you the number of lines per class, if train=20, u take 20 each class
-        Train_Test train_test= new Train_Test(ds,50,4);
+        Train_Test train_test= new Train_Test(ds,20,4);
         /*for (String[] instance:train_test.train_disc) {
             System.out.print("**\t");
             for (String val:instance) {
@@ -126,14 +126,18 @@ public class Main {
         System.out.println(frequences[0]+frequences[1]+frequences[2]);
         */
         /************************************************ Naive Bayesian Classifier********************************************/
-        /*for (int i = 0; i < train_test.test_disc.size(); i++) {
+        System.out.println("\n********************************************* Naive Bayes *********************************************");
+        int correct_predictions=0;
+        for (int i = 0; i < train_test.test_disc.size(); i++) {
             int naive_bayesian=pretraitement.predict_naive_bayesian(train_test.train_disc,4,train_test.test_disc.get(i));
+            if(naive_bayesian==Integer.valueOf(train_test.test_disc.get(i)[7])){correct_predictions++;}
             for (String element:train_test.test_disc.get(i)) {
                 System.out.print(element+"\t");
             }
             System.out.print("\n");
             System.out.println("Prediction="+naive_bayesian);
-        }*/
+        }
+        System.out.println(correct_predictions);
         //int naive_bayesian=pretraitement.predict_naive_bayesian(train_test.train_disc,4,train_test.test_disc.get(50));
         /*for (String element:train_test.test_disc.get(50)) {
             System.out.print(element+"\t");
@@ -142,7 +146,33 @@ public class Main {
         System.out.println("Prediction="+naive_bayesian);*/
 
         /************************************************ Confusion Matrix ********************************************/
-        //double[][] confusion_matrix=pretraitement.Confusion_matrix(train_test.train_disc,4,train_test.test_disc);
+        System.out.println("\n********************************************* Confusion matrix *********************************************");
+        double[][] confusion_matrix=pretraitement.Confusion_matrix(train_test.train_disc,4,train_test.test_disc);
+        System.out.println("\n********************************************* dataset *********************************************");
+        //afficher dataset_discrétisé
+        for (String[] instance:dataset_disc) {
+            System.out.print("**\t");
+            for (String val:instance) {
+                System.out.print(val+"/");
+            }
+            System.out.println("\n");
+        }
+        System.out.println("\n********************************************* test data *********************************************");
+        for (String[] instance:train_test.test_disc) {
+            System.out.print("**\t");
+            for (String val:instance) {
+                System.out.print(val+"/");
+            }
+            System.out.println("\n");
+        }
+        System.out.println("\n********************************************* train data *********************************************");
+        for (String[] instance:train_test.train_disc) {
+            System.out.print("**\t");
+            for (String val:instance) {
+                System.out.print(val+"/");
+            }
+            System.out.println("\n");
+        }
     }
 
 }

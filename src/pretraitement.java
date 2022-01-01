@@ -558,6 +558,29 @@ public class pretraitement {
         }
         return (frequent_items);
     }
+    /*************************************** Règles d'association ***********************************************************/
+
+    public static void Association_rules(ArrayList<Itemset_Element> Lk){
+        ArrayList<Association_rules_element>  association_rules=new ArrayList<>();
+        ArrayList<Itemset_Element> L1=new ArrayList<>();
+        int k=2;
+
+        //remplir L1 et l'enlever de Lk qui contient tous les L
+        for (int i = 0; i < Lk.size() ; i++) {
+            if(Lk.get(i).items.size()==1){
+                L1.add(Lk.get(i));
+                Lk.remove(i);
+            }
+        }
+        //get max size of L (maybe k=3 if L3 is max OR k=4 if L4 is max) it depends..
+        for (int i = 0; i < Lk.size(); i++) {
+            if(Lk.get(i).items.size()>k){
+                k++; // or k=Lk.get(i).items.size() same thing
+            }
+        }
+        //
+    }
+
     /*************************************** Naive Bayesian ***********************************************************/
     /*public static void proba_bayes(Dataset train,Dataset test){
         ArrayList<String[]> train_disc=new ArrayList<>();
@@ -660,7 +683,8 @@ public class pretraitement {
             cond_probas.add(probas_per_attribute(train_disc,Q,i));
         }
         //to verify final probas for each attribute (CHECKED)
-        /*for (int i = 0; i < cond_probas.size(); i++) {
+        /*System.out.println("\n********************************************* COND PROBAS *********************************************");
+        for (int i = 0; i < cond_probas.size(); i++) {
             System.out.println("Attribut:"+(i+1));
             for (int j = 0; j < cond_probas.get(i).size(); j++) {
                 System.out.println("Classe:"+(j+1));
@@ -744,12 +768,12 @@ public class pretraitement {
             confusion_matrix[real-1][predicted-1]++;
         }
         //afficher matrice de confusion
-        /*for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 System.out.print(confusion_matrix[i][j]+"\t\t");
             }
             System.out.print("\n");
-        }*/
+        }
         return confusion_matrix;
     }
 
@@ -769,4 +793,5 @@ public class pretraitement {
         }
         return mini_confusion_matrix;
     }
+
 }
